@@ -473,6 +473,44 @@ function recoMarketRankHTML(cal){
     +'<tbody>'+tr+'</tbody></table>'
     +'<div class="muted" style="font-size:11px;margin-top:2px">✅ = กำไร · ตลาดที่ backtest ผ่านชัด: ฮั่งเส็งเช้า/บ่าย · นิเคอิเช้า · (ที่เหลือเบาๆ) · เลี่ยงตลาดที่ ❌</div></div>';
 }
+// ===== 🧭 แนวทางรายตลาด: แต่ละตลาดควรเดินสูตรไหน (เลือกสูตร ROI บวกสูงสุดจาก backtest) =====
+function recoBestPlanHTML(cal){
+  const FML={beil:{ic:"🎰",nm:"เบิลเด่น (กาง64)"},freq:{ic:"🔥",nm:"ชุด1 บ่อย+ค้าง"},round:{ic:"🎯",nm:"ชุด2 ตรงรอบ"},uniq:{ic:"🎲",nm:"ชุด3 ไม่ซ้ำ"}};
+  let rows=[],avoid=[];
+  Object.keys(cal).forEach(function(nm){
+    let s=(cal[nm]&&cal[nm].summary)?cal[nm].summary:null; if(!s)return;
+    let best=null;
+    Object.keys(FML).forEach(function(k){
+      let a=s[k]; if(!a||!a.buys)return;
+      if(a.roi>0&&(!best||a.roi>best.roi))best={k:k,buys:a.buys,pct:a.pct,roi:a.roi,net:a.net};
+    });
+    if(best)rows.push({nm:nm,b:best});
+    else avoid.push(nm);
+  });
+  if(!rows.length&&!avoid.length)return "";
+  rows.sort((a,b)=>b.b.roi-a.b.roi);
+  let tr=rows.map(function(r){
+    let f=FML[r.b.k],small=r.b.buys<10;
+    return '<tr style="background:rgba(77,214,160,.07)">'
+      +'<td style="padding:2px 6px">✅ '+r.nm+'</td>'
+      +'<td style="padding:2px 6px">'+f.ic+' '+f.nm+(small?' <span style="color:var(--ac2)">⚠️ยิงแค่ '+r.b.buys+'</span>':'')+'</td>'
+      +'<td style="text-align:center">'+r.b.buys+'</td>'
+      +'<td style="text-align:center;font-weight:800">'+r.b.pct+'%</td>'
+      +'<td style="text-align:right;color:var(--cool);font-weight:800">+'+r.b.roi+'%</td>'
+      +'<td style="text-align:right;color:var(--cool)">'+(r.b.net>0?'+':'')+r.b.net+'</td></tr>';
+  }).join("");
+  avoid.forEach(function(nm){
+    tr+='<tr><td style="padding:2px 6px">❌ '+nm+'</td>'
+      +'<td style="padding:2px 6px;color:var(--hot)">ทุกสูตรติดลบ — เลี่ยง</td>'
+      +'<td colspan="4" style="text-align:center;color:#889">—</td></tr>';
+  });
+  return '<div style="border:1px dashed var(--cool);border-radius:8px;padding:6px 8px;margin:0 0 8px;background:rgba(77,214,160,.05)">'
+    +'<div class="muted" style="margin-bottom:3px">🧭 แนวทางรายตลาด — แต่ละตลาดควรเดินสูตรไหน (เลือกสูตรที่ ROI บวกสูงสุดจาก backtest ซื้อทุกครั้งที่สูตรโผล่ · จ่าย 900)</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    +'<thead><tr style="color:#889"><th style="text-align:left;padding:0 6px">ตลาด</th><th style="text-align:left;padding:0 6px">สูตรที่ควรเดิน</th><th>ยิง</th><th>เข้า%</th><th style="text-align:right">ROI</th><th style="text-align:right">สุทธิ</th></tr></thead>'
+    +'<tbody>'+tr+'</tbody></table>'
+    +'<div class="muted" style="font-size:11px;margin-top:2px">อัปเดตอัตโนมัติตามข้อมูลล่าสุด · ⚠️ = ตัวอย่างน้อย (&lt;10 ครั้ง) อย่าเพิ่งเชื่อเต็มร้อย · ❌ = ไม่มีสูตรไหนบวก</div></div>';
+}
 // ===== 📅 การ์ดรวม: สรุปรายวัน "ทุกหวย" เข้าสูตรอะไรบ้าง (ใหม่→เก่า) =====
 let __RECOCALALL=null;
 function renderRecoCalAll(){
@@ -508,6 +546,7 @@ function recoCalAllHTML(cal){
   let out='<div class="card" style="border-color:var(--hot)"><h3 style="margin:0 0 4px">📅 สรุปรายวัน — ทุกหวยเข้าสูตรอะไรบ้าง</h3>'
     +'<div class="muted" style="margin-bottom:8px">ไล่ใหม่→เก่า · แต่ละวันบอกว่าหวยไหน "เข้า" ชุดไหน + เลขที่กาง · '
     +'<b style="color:var(--cool)">🔥/🎯/🎲 ชุด1/2/3 กาง56</b> · <b style="color:var(--hot)">🎰 เบิลเด่น กาง64</b> · รวม '+dates.length+' วันที่มีเข้า</div>'
+    +recoBestPlanHTML(cal)
     +recoMarketRankHTML(cal)
     +'<div class="scroll" style="max-height:520px;overflow:auto">';
   dates.forEach(function(d){
