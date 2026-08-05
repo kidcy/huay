@@ -831,7 +831,7 @@ function recommend(){
       +' <span style="color:var(--cool);font-weight:700">📌 '+cur+' · ข้อมูลถึงงวด '+lastDate+'</span>'
       +(buyAll.length?' <button class="btn" onclick="bkAdd(window.__buyAll)">🧺 ใส่ทั้งหมด '+buyAll.length+' ตัว (ไม่ซ้ำ)</button>':'')
       +' <span class="muted">ทุนจริง (แยกคู่/นับซ้ำ) <b style="color:var(--hot)">'+totalTix+' ตัว</b> · เลขไม่ซ้ำ '+buyAll.length+' ตัว</span></div>';
-    buyBox=head+boxes.join("");
+    buyBox=head+'<details style="margin-top:2px"><summary style="cursor:pointer;color:var(--ac2);font-weight:700;padding:6px 0;user-select:none">📂 กดเพื่อดูเลขทั้ง 3 ชุด (ซ่อนไว้ตอนแรก)</summary>'+boxes.join("")+'</details>';
   })();
   // ===== 🎰 ตัวเลือกเสริม: เบิลอันดับ 1+2 (แยกชุด) — จาก backtest ROI ดีสุด (+61%) ตอนอันดับ1 ค้างเกินเฉลี่ย =====
   (function(){
